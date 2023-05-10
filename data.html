@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+	<title>FlyingOrgan Data</title>
+	<link rel="icon" href="image.svg" type="image/svg">
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script>
+		$(document).ready(function(){
+			function getData() {
+				$.ajax({
+					url: "esp-data.php",
+					dataType: "json",
+					success: function(data){
+						var table = $("#data_table");
+						table.find("tbody").empty();
+						$.each(data, function(index, element){
+							var row = $("<tr>");
+							row.append($("<td>").text(element.id));
+							row.append($("<td>").text(element.AmbientTemp));
+							row.append($("<td>").text(element.AmbientHumidity));
+							row.append($("<td>").text(element.ProbeTemp));
+							row.append($("<td>").text(element.ProbeHumidity));
+							row.append($("<td>").text(element.Pressure));
+							row.append($("<td>").text(element.Altitude));
+							row.append($("<td>").text(element.Ax));
+							row.append($("<td>").text(element.Ay));
+							row.append($("<td>").text(element.Az));
+							
+							row.append($("<td>").text(element.Light));
+							row.append($("<td>").text(element.reading_time));
+							table.find("tbody").append(row);
+						});
+					},
+					error: function() {
+						setTimeout(getData, 2000); // Try again after 2 seconds
+					}
+				});
+			}
+			getData(); // Start the initial request
+			setInterval(getData, 10000);
+		});
+	</script>
+	<style>
+    *{
+    font-family:"Comic Sans MS";
+    }
+    table, th, td {
+        text-align: center;
+        border:1px solid black;
+        margin-left: auto; 
+        margin-right: auto;
+        border-collapse: collapse;
+    }
+    #graph_div {
+		max-width: 0 auto;
+		margin: 0 auto;
+	}
+</style>
+</head>
+<body>
+    <h2><center>Sensored Organ & Tissue Transport Telemetry Data</h2>
+	<table id="data_table">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Ambient Temperature (℃) &#127777</th>
+				<th>Ambient Humidity (%) &#128166</th>
+				<th>Probe Temperature (℃) &#127777</th>
+				<th>Probe Humidity (%) &#128166</th>
+				<th>Pressure (hPa) &#127947</th>
+				<th>Altitude (m) &#127966</th>
+				<th>X Acceleration (g) &#128663&#128168</th>
+				<th>Y Acceleration (g) &#128663&#128168</th>
+				<th>Z Acceleration (g) &#128663&#128168</th>
+				<th>Light (lx) &#128294</th>
+				<th>Reading Time &#128343</th>
+			</tr>
+		</thead>
+		<tbody>
+			<!-- The table will be populated with data from the server -->
+		</tbody>
+	</table>
+	<div id="graph_div"></div>
+</body>
+</html>
