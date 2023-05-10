@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Sensored Organ Box</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css" integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
+    <link rel="icon" href="image.svg" type="image/svg">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2.6.4/dist/email.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark p-3">
+        <div class="d-flex col-12 col-md-3 col-lg-2 mb-2 mb-lg-0 flex-wrap flex-md-nowrap justify-content-between">
+            <a class="navbar-brand">
+                Sensored Organ Container
+            </a>
+            <button class="navbar-toggler d-md-none collapsed mb-1" type="button" data-toggle="collapse" data-target="#sidebar" aria-controls="sidebar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="row">
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="position-sticky">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                          <a class="nav-link active" aria-current="page" href="#">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                            <span class="ml-2">Dashboard</span>
+                          </a>
+                          <a class="nav-link active" onclick="jumptoMap()" aria-current="page">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-globe"><path d="M22 12 A10 10 0 0 1 12 22 A10 10 0 0 1 2 12 A10 10 0 0 1 22 12 z"/><path d="M2 12 L22 12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                            <span class="ml-2">Go To Map</span>
+                          </a>
+                          <a class="nav-link active" aria-current="page" href="https://flyingorgan.com/data">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                          
+                            <span class="ml-2">All Data</span>
+                          </a>
+                        </li>
+                        <table>
+                            <th scope="col">Notification Center</th>
+                            <hr>
+                        </table>
+                        <table id = "notification_table" class="table" style="background-color: #f2f2f2;">
+                        </table>
+                    </ul>
+                </div>
+            </nav>
+            <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4 py-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Overview</li>
+                    </ol>
+                </nav>
+                <h1 class="h2">Dashboard</h1>
+                <p>Group 4 Organ Transport Telemetry Data</p>
+                <button id="email-button" class = "btn btn-block btn-light" onclick="getEmail()">Click Here to Recieve Email Notifications</button>
+                <div class="row my-4">
+                    <div class="col-12 col-xl-13 mb-4 mb-lg-0 mb-xl-4 ">
+                        <div class="card">
+                            <h4 class="card-header">Ice Temperature</h4>
+                            <div class="card-body">
+                              <h5 class="card-title" id="icetemp"></h5>
+                              <h4 class="card-text" id= "var8"></h4>
+                            </div>
+                          </div>
+                    </div>
+                    <div class="col-12 col-xl-13 mb-4 mb-lg-0 mb-xl-4 ">
+                        <div class="card">
+                            <h4 class="card-header">G-Force Event</h4>
+                            <div class="card-body">
+                              <h5 class="card-title"></h5>
+                              <h4  id= "var12"></h5>
+                            </div>
+                          </div>
+                    </div>
+                    <div class="col-12 col-xl-13 mb-4 mb-lg-0 mb-xl-4 ">
+                        <div class="card">
+                            <h4 class="card-header">Charge Status</h4>
+                            <div class="card-body">
+                                <table>
+                            <th scope="col">Battery Percentage</th>
+                        </table>
+                              <h5 class="card-title"></h5>
+                              <div id="graph_div6"></div>
+                            </div>
+                          </div>
+                    </div>
+                    <div class="col-12 col-xl-13 mb-4 mb-lg-0 mb-xl-4">
+                        <div class="card">
+                            <h4 class="card-header">Box Tamper Status</h4>
+                            <div class="card-body">
+                              <h5 class="card-title"></h5>
+                              <h4 id= "var9"></h4>
+                            </div>
+                          </div>
+                    </div>
+                    <div class="col-12 col-xl-13 mb-4 mb-lg-0 mb-xl-4">
+                        <div  id = "mapcard" class="card">
+                            <h4  class="card-header">Current Box Location</h4>
+                            <div class="card-body">
+                                <div id="map1"></div>
+                                <h6 style="margin-top: 10px;">City and Weather:</h6>
+                                     <p id="location" style="display: inline; margin-right: 5px;"></p>
+                                    <p class="temp" style="display: inline; margin-right: 5px;"></p> 
+                                    <p id="description"style="display: inline; margin-right: 5px;"></p>
+
+                                <a href="/fullmap" class="btn btn-block btn-light">View Full Screen Map</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-xl-13 mb-4 mb-lg-0 mb-xl-4">
+                        <div class="card">
+                            <h4 class="card-header">All Sensor Data</h4>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                          <!-- ; border:2px solid black -->
+                                          <th class = "temp-table" id="th1" style="cursor:pointer;">Probe Temperature (℃)</th>
+                                          <th class = "humidity"  id="th2" style="cursor:pointer">Probe Humidity (%)</th>
+                                          <th class = "pressure" id="th3" style="cursor:pointer">Pressure (hPa)</th>
+                                          <th class = "altitude" id="th4" style="cursor:pointer">Altitude (m)</th>
+                                          <th id="th5" >Acceleration (x, y, z)(g)</th>
+                                          <th class = "light" id="th7" style="cursor:pointer">Light (lx)</th>
+                                        </thead>
+                                        <tbody>
+                                          <tr>
+                                            <td id="var1"></td>
+                                            <td id="var2"></td>
+                                            <td id="var3"></td>
+                                            <td id="var4"></td>
+                                            <td id="var5"></td>
+                                            <td id="var7"></td>
+                                          </tr>
+                                          <tr>
+                                        </tbody>
+                                      </table>
+                                </div>
+                                <a href="https://flyingorgan.com/data" class="btn btn-block btn-light">View All Data</a>
+                                <button class = "btn btn-block btn-light" onclick="downloadCSV()">Download All Data as CSV</button>
+                                <button id="toggle-graphs" class = "btn btn-block btn-light"> Show/Hide All Graphs</button>
+                            </div>
+                        </div>
+                </div>
+                
+                    <div id ="temp_graph" class="col-12 col-xl-13 mb-4 mb-lg-0 mb-xl-4 justify-content-center" style = "display:none" >
+                        <div class="card">
+                            <h5 class="card-header">Probe Sensor - Temperature</h5>
+                            <div class="card-body">
+                                <div id="graph_div1"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id ="humidity_graph" class="col-12 col-xl-13 mb-4 mb-lg-0 mb-xl-4 justify-content-center" style = "display:none" >
+                        <div class="card">
+                            <h5 class="card-header">Probe Sensor - Humidity </h5>
+                            <div class="card-body">
+                                <div id="graph_div2" ></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id ="pressure_graph" class="col-12 col-xl-13 mb-4 mb-lg-0 mb-xl-4 justify-content-center" style = "display:none" >
+                        <div class="card">
+                            <h5 class="card-header">Pressure Readings</h5>
+                            <div class="card-body">
+                                <div id="graph_div3" ></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id ="altitude_graph" class="col-12 col-xl-13 mb-4 mb-lg-0 mb-xl-4 justify-content-center" style = "display:none" >
+                        <div class="card">
+                            <h5 class="card-header">Altitude Readings</h5>
+                            <div class="card-body">
+                                <div id="graph_div4" ></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id ="light_graph" class="col-12 col-xl-13 mb-4 mb-lg-0 mb-xl-4 justify-content-center" style = "display:none" >
+                        <div class="card">
+                            <h5 class="card-header">Light Sensor</h5>
+                            <div class="card-body">
+                                <div id="graph_div5"></div>
+                            </div>
+                        </div>
+                    </div>
+                <footer class="pt-5 d-flex justify-content-between">
+                    <span>Copyright © 2023 <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Group 4</a></span>
+                    <ul class="nav m-0">
+                        <li class="nav-item">
+                          <a class="nav-link text-secondary" aria-current="page" href="#">Contact</a>
+                        </li>
+                      </ul>
+                </footer>
+            </main>
+        </div>
+    </div>
+        <script>
+        
+        var flag_light=0;
+		var flag_gforce=0;
+		var flag_temp= 0;
+		var emailAddress;
+
+        
+    function getEmail(emailAddress){
+        var emailAddress = prompt("Please enter your email address:");
+        document.getElementById("email-button").style.display = "none";
+    };
+ 
+    function sendEmail(emailAddress,messageSend,subjectSend) {
+    // Create the email template parameters
+    const templateParams = {
+        to_name: emailAddress,
+        subject: subjectSend,
+        message: messageSend
+    };
+
+    // Send the email using EmailJS
+    emailjs.send("flyingorgan", "flyingorgan_template", templateParams)
+        .then(function(response) {
+            alert('Email sent successfully!');
+        }, function(error) {
+            console.log('Failed to send email:\n ' + JSON.stringify(error));
+        });
+}
+        
+		$(document).ready(function(){
+			function getData() {
+				$.ajax({
+					url: "https://flyingorgan.com/esp-data.php",
+					dataType: "json",
+					success: function(data){
+					    const format = (num, decimals) => num.toLocaleString('en-US', {
+                            minimumFractionDigits: 2,      
+                            maximumFractionDigits: 2,
+                        });
+                        
+						var a = data.map(function(d) { return d.reading_time; });
+						var b = data.map(function(d) { return d.ProbeTemp; });
+						var c = data.map(function(d) { return d.ProbeHumidity; });
+						var d = data.map(function(d) { return d.Pressure; });
+						var e = data.map(function(d) { return d.Altitude; });
+						var f = data.map(function(d) { return d.Ax; });
+						var g = data.map(function(d) { return d.Ay; });
+						var h = data.map(function(d) { return d.Az; });
+						var l = data.map(function(d) { return d.Light; });
+						var m = data.map(function(d) { return d.Latitude; });
+						var n = data.map(function(d) { return d.Longitude; });
+						var o = data.map(function(d) { return d.Battery; });
+						
+						if(((b[0] - b[1]) / b[1] * 100) > 0){
+						    <!-- NEED TO CHANGE TEXT AND RANGE OF VALUES -->
+						    var tempchange = format(((b[0] - b[1]) / b[1] * 100)) + " % increase since last data";
+						    document.getElementById('var8').style.color='orange';
+						    var subjectSend = "Rapid Temerature Change Detected!"; 
+						    if(flag_temp == 0 && (((b[0] - b[1]) / b[1] * 100) > 1)){
+						        TemperatureUpdate();
+						        document.getElementById('var8').style.color='red';
+						        flag_temp = 1;
+						        sendEmail(emailAddress,"Rapid Temperature Change Detected!",subjectSend);
+						    }
+						}
+						else if(((b[0] - b[1]) / b[1] * 100) == 0) {
+						    var tempchange = "No change in temperature in the last minute";
+						    document.getElementById('var8').style.color='green';
+						    flag_temp = 0;
+						}
+						else {
+						    var tempchange = format(((b[0] - b[1]) / b[1] * 100)) + " % decrease since last data";
+						    document.getElementById('var8').style.color='green';
+						    flag_temp = 0;
+						}
+						if(l[0] > 300){
+						    var lightchange = "Light sensor detected the box being opened";
+						    var subjectSend = "The box has been opened!";
+						    document.getElementById('var9').style.color='red';
+						    if(flag_light == 0){
+						        BoxTamperUpdate();
+						        sendEmail(emailAddress,lightchange,subjectSend);
+						        flag_light = 1;
+						    }
+						}
+						else{
+						    var lightchange = "Box Secure";
+						    document.getElementById('var9').style.color='green';
+						    flag_light = 0;
+						};
+						if((f[0] > 8|| g [0] > 8|| h[0] > 8)){
+						    var gforcechange = "A high G-force event was recorded";
+						    var subjectSend = "The box has experienced a high G-Force Event!";
+						    document.getElementById('var12').style.color='red';
+						    if(flag_gforce == 0){
+						        flag_gforce = 1;
+						        BoxGforceUpdate();
+						        sendEmail(emailAddress,gforcechange,subjectSend);
+						    }
+						    
+						}else{
+						    var gforcechange = "The box is undergoing normal forces of transit";
+						    document.getElementById('var12').style.color='green';
+						    flag_gforce = 0;
+						};
+						
+
+						
+						if((((o[0])/(4.2-3.5))*100) > 80){
+						    barcolor = "green";
+						}
+						else if((((o[0])/(4.2-3.5))*100) < 75 & (((o[0])/(4.2-3.5))*100) > 50){
+						    barcolor = "yellow";
+						}
+						else if((((o[0])/(4.2-3.5))*100) < 50 & (((o[0])/(4.2-3.5))*100) > 25){
+						    barcolor = "orange";
+						}
+						else{
+						    barcolor = "red";
+						}
+						
+						var probetemp = b[0];
+						var probehumidity = c[0];
+						var pressure = d[0];
+						var altitude = e[0];
+						var ax = f[0];
+						var ay = g[0];
+						var az = h[0];
+						var light = l[0];
+						var lat = m[0];
+						var long = n[0];
+						var bat = o[0];
+						map1.setView([lat, long]);
+                        marker.setLatLng([lat, long]);
+                        
+                        const api = '7add1d183ebd35405d71cd21390a56da'; //Replace with your API
+                        const loc = document.querySelector('#location');
+                        const tempDisplay = document.querySelector('.temp');
+                        const descDisplay = document.querySelector('#description');
+                        const base = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&appid=${api}&units=metric`;
+
+                        fetch(base)
+                               .then((response) => {
+                                 return response.json();
+                               })
+                               .then((data) => {
+                                 const { temp } = data.main;
+                                 const place = data.name;
+                                 const description = data.weather[0].description;
+                                 const fahrenheit = (temp * 9 / 5) + 32;
+                                 // Interacting with DOM to show data
+                                 loc.textContent = `${place}`;
+                                 tempDisplay.textContent = `${fahrenheit.toFixed(2)} F°`;
+                                 descDisplay.textContent = `${description}`;
+                               })
+                               .catch((error) => {
+                                 console.log(error);
+                               });
+
+						var trace1 = {
+							x: a,
+							y: b,
+							type: 'scatter',
+							connectgaps: false
+						};
+						
+						var trace2 = {
+							x: a,
+							y: c,
+							type: 'scatter',
+							line: {color: 'red'},
+							connectgaps: false
+						};
+						
+						var trace3 = {
+							x: a,
+							y: d,
+							type: 'scatter',
+							line: {color: 'green'},
+							connectgaps: false
+						};
+						
+						var trace4 = {
+							x: a,
+							y: e,
+							type: 'scatter',
+							line: {color: 'orange'},
+							connectgaps: false
+						};
+						
+						var trace5 = {
+							x: a,
+							y: l,
+							type: 'scatter',
+							line: {color: 'yellow'},
+							connectgaps: false
+						};
+						
+						var trace6 = {
+                            type: "indicator",
+                            mode: "number+gauge",
+                            gauge: {
+		                        shape: "bullet",
+                                bar: { color: barcolor, thickness: 0.85 },
+                                axis: { range: [0, 100] },
+                                threshold: {
+                                line: { color: "black", width: 8 },
+                                thickness: 0.9,
+                                value: ((bat/4.2)*100)
+                                }
+                            },
+                            value: ((bat/4.2)*100),
+                            domain: { x: [0, 1], y: [0, 1] }
+                        }
+
+						var config = {responsive: true};
+						
+                        var lastIndex = b.length - 1;
+                        var lastTemp = b[lastIndex];
+                        var rateOfChange = (lastTemp - b[0]) / lastIndex;
+                        var timeToTarget = (2 - lastTemp) / rateOfChange;
+                        
+						icechange = 'Approx. Runtime: ' + (timeToTarget /3600).toFixed(2) + ' hours';
+						var data1 = [trace1];
+						var layout1 = {xaxis: {title: {text: "Time"}}, yaxis: {title: {text: "Temperature (℃)"}},title:{text: icechange}, showlegend: false};
+						var data2 = [trace2];
+						var layout2 = {xaxis: {title: {text: "Time"}}, yaxis: {title: {text: "Humidity (%)"}}, showlegend: false};
+						var data3 = [trace3];
+						var layout3 = {xaxis: {title: {text: "Time"}}, yaxis: {title: {text: "Pressure (hPa)"}}, showlegend: false};
+						var data4 = [trace4];
+						var layout4 = {xaxis: {title: {text: "Time"}}, yaxis: {title: {text: "Altitude (m)"}}, showlegend: false};
+						var data5 = [trace5];
+						var layout5 = {xaxis: {title: {text: "Time"}}, yaxis: {title: {text: "Light (lux)"}}, showlegend: false};
+						var data6 = [trace6];
+						var layout6 = {height: 250, margin: { t: 10 , b: 28}};
+						//var data6 = [trace6, trace7];
+						//var layout6 = {grid: {rows: 1, columns: 2, pattern: 'independent'},};
+						
+						
+						Plotly.newPlot('graph_div1', data1, layout1 , config, {displayModeBar: false});
+						Plotly.newPlot('graph_div2', data2, layout2 , config, {displayModeBar: false});
+						Plotly.newPlot('graph_div3', data3, layout3 , config, {displayModeBar: false});
+						Plotly.newPlot('graph_div4', data4, layout4 , config, {displayModeBar: false});
+						Plotly.newPlot('graph_div5', data5, layout5 , config, {displayModeBar: false});
+					    //Plotly.newPlot('graph_div6', trace7, layout6, config, {displayModeBar: false});
+					    Plotly.newPlot('graph_div6', data6, layout6 , config, {displayModeBar: false});
+
+						accel = ax +", "+ ay + ", " + az ;
+						lat1 = "Latitude: " + lat;
+						long1 = "Longitude: " + long;
+						document.getElementById("var1").innerHTML = probetemp;
+						document.getElementById("icetemp").innerHTML = probetemp + " ℃";
+						document.getElementById("var2").innerHTML = probehumidity;
+						document.getElementById("var3").innerHTML = pressure;
+						document.getElementById("var4").innerHTML = altitude;
+						document.getElementById("var5").innerHTML = accel;
+						document.getElementById("var7").innerHTML = light;
+						document.getElementById("var8").innerHTML = tempchange;
+						document.getElementById("var9").innerHTML = lightchange;
+						document.getElementById("var12").innerHTML = gforcechange;
+					},
+					error: function() {
+						setInterval(getData, 10000); // Try again after 2 seconds
+					}
+				});
+			}
+			getData(); // Start the initial request
+			setInterval(getData, 10000);
+		});
+		
+		var map1 = L.map('map1', { dragging: true, scrollWheelZoom: true, zoomControl: false, attributionControl: false }).setView([0, 0], 13);
+        var marker = L.marker([0, 0]).addTo(map1);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom: 19,}).addTo(map1);
+	</script>
+	    <script>
+        (function(){
+            emailjs.init("9daIlC60QtjvYxsRX"); // Replace with your EmailJS user ID
+        })();
+    </script>
+	
+    <script>
+    
+    let graphsVisible = false;
+    const toggleButton = document.getElementById('toggle-button');
+    
+    function toggleGraphs() {
+        if (graphsVisible) {
+            hideGraphs();
+            toggleGraphs.textContent = 'Show Graphs';
+            graphsVisible = false;
+        }else{
+            showAllGraphs();
+            toggleGraphs.textContent = 'Hide Graphs';
+            graphsVisible = true;
+        }
+    }
+
+    function showGraph(graphId) {
+      // Hide all graphs
+      document.getElementById('temp_graph').style.display = 'none';
+      document.getElementById('humidity_graph').style.display = 'none';
+      document.getElementById('pressure_graph').style.display = 'none';
+      document.getElementById('altitude_graph').style.display = 'none';
+      document.getElementById('light_graph').style.display = 'none';
+
+      // Show the selected graph
+      document.getElementById(graphId).style.display = 'block';
+    }
+    
+    function hideGraphs(){
+      document.getElementById('temp_graph').style.display = 'none';
+      document.getElementById('humidity_graph').style.display = 'none';
+      document.getElementById('pressure_graph').style.display = 'none';
+      document.getElementById('altitude_graph').style.display = 'none';
+      document.getElementById('light_graph').style.display = 'none';
+    }
+    function showAllGraphs(){
+      document.getElementById('temp_graph').style.display = 'block';
+      document.getElementById('humidity_graph').style.display = 'block';
+      document.getElementById('pressure_graph').style.display = 'block';
+      document.getElementById('altitude_graph').style.display = 'block';
+      document.getElementById('light_graph').style.display = 'block';
+        
+    }
+    function jumptoMap(){
+        const chart = document.getElementById('mapcard');
+        chart.scrollIntoView({behavior:'smooth'});
+    }
+    function deletethis(){
+        var td = event.target.parentNode; 
+        var tr = td.parentNode; // the row to be removed
+        tr.parentNode.removeChild(tr);
+    }
+    
+    function BoxTamperUpdate(){
+        var now = new Date();
+        var light_notification = 'The Box was Opened at: ' + now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate() + ' ' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds();
+        var table = document.getElementById("notification_table");
+        var row = table.insertRow(0);
+        var cell1 = row.insertCell(0);
+        row.classList.add("Light_update");
+        cell1.innerHTML = light_notification;
+        row.addEventListener('click', deletethis);
+    }
+    
+    function BoxGforceUpdate(){
+        var now = new Date();
+        var gforce_notification = 'The Box Experienced a High G-Force Event at: ' + now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate() + ' ' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds();
+        var table = document.getElementById("notification_table");
+        var row = table.insertRow(0);
+        var cell1 = row.insertCell(0);
+        row.classList.add("GForce_update");
+        cell1.innerHTML = gforce_notification;
+        row.addEventListener('click', deletethis);
+    }
+    
+    function TemperatureUpdate(){
+        var now = new Date();
+        var Temp_notification = 'The Box was dramatically increasing in temperature at: ' + now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate() + ' ' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds();
+        var table = document.getElementById("notification_table");
+        var row = table.insertRow(0);
+        var cell1 = row.insertCell(0);
+        row.classList.add("Temp_update");
+        cell1.innerHTML = Temp_notification;
+        row.addEventListener('click', deletethis);
+    }
+    
+    function downloadCSV() {
+    // Send a GET request to the PHP script that generates the CSV file
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'generate_csv.php', true);
+        xhr.responseType = 'blob';
+
+    // When the response is received, download the CSV file
+        xhr.onload = function() {
+            if (this.status == 200) {
+                var now = new Date();
+                var filename = 'allsensordata ' + now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate() + ' ' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds() + '.csv';
+                var csv = new Blob([this.response], {type: 'text/csv'});
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(csv);
+                link.download = filename;
+                link.click();
+            }
+        };
+    // Send the request
+        xhr.send();
+    }
+
+    // Add click event listeners for each table header (sensor)
+    document.getElementById('th1').addEventListener('click', () => showGraph('temp_graph'));
+    document.getElementById('th2').addEventListener('click', () => showGraph('humidity_graph'));
+    document.getElementById('th3').addEventListener('click', () => showGraph('pressure_graph'));
+    document.getElementById('th4').addEventListener('click', () => showGraph('altitude_graph'));
+    document.getElementById('th7').addEventListener('click', () => showGraph('light_graph'));
+    document.getElementById('toggle-graphs').addEventListener('click',() => toggleGraphs());
+    
+  </script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js" integrity="sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/" crossorigin="anonymous"></script>
+</body>
+</html>
